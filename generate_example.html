@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传MIDI文件</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+        main {
+            padding: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        .result-container {
+            margin-top: 20px;
+        }
+        .result-container a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>民韵智创——上传MIDI文件并生成结果Demo演示</h2>
+</header>
+
+<main>
+    <p>请选择一个MIDI文件进行上传，点击上传按钮提交到服务器，处理结果将在下方提供下载链接。</p>
+    
+    <!-- 文件上传 -->
+    <input type="file" id="midiFile" accept=".mid">
+    <button onclick="uploadMIDI()">上传MIDI文件</button>
+
+    <!-- 结果展示 -->
+    <div class="result-container" id="resultContainer" style="display:none;">
+        <p>处理完成，点击下面的链接下载结果文件：</p>
+        <a id="downloadLink" href="#" download>下载MIDI结果</a>
+    </div>
+</main>
+
+<script>
+    // 文件上传处理
+    async function uploadMIDI() {
+        const fileInput = document.getElementById('midiFile');
+        const resultContainer = document.getElementById('resultContainer');
+        const downloadLink = document.getElementById('downloadLink');
+        console.log(fileInput.files)
+
+        // 确保文件被选择
+        if (!fileInput.files[0]) {
+            alert('请先选择一个MIDI文件');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        console.log(formData)
+
+        try {
+            // 假设的上传接口 URL
+            const response = await fetch('http://118.31.6.11:5000/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            
+            if (!response.ok) {
+                throw new Error('文件上传失败');
+            }
+            
+            console.log(response)
+            // 获取返回的二进制数据（MIDI文件）
+            const blob = await response.blob();
+
+            // 创建一个URL链接，指向返回的MIDI文件
+            const url = URL.createObjectURL(blob);
+
+            // 更新下载链接
+            downloadLink.href = url;
+            downloadLink.download = 'result.mid'; // 设定下载文件名
+            resultContainer.style.display = 'block'; // 显示下载链接
+        } catch (error) {
+            alert('上传过程中发生了错误: ' + error.message);
+        }
+    }
+</script>
+
+</body>
+</html>
